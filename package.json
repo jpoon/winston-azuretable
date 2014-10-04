@@ -1,0 +1,23 @@
+{
+  "name": "winston-azure",
+  "version": "1.0.0",
+  "description": "Azure Table Storage transport for Winston",
+  "main": "./lib/winston-azure.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "keywords": [
+    "winston",
+    "azure"
+  ],
+  "author": "Jason Poon <github@jasonpoon.ca>",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "mocha": "^1.21.4",
+    "winston": "^0.8.0"
+  },
+  "dependencies": {
+    "azure": "^0.9.16"
+  }
+}
