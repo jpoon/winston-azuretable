@@ -3,7 +3,7 @@ var chai = require('chai');
 
 var azure = require('azure');
 var winston = require('winston');
-var azureLogger = require("../lib/winston-azure.js").AzureLogger;
+var azureLogger = require("../lib/winston-azuretable.js").AzureLogger;
 
 describe('azure logger', function() {
     describe('ctor', function() {
