@@ -1,6 +1,5 @@
 var expect = require('chai').expect;
 var chai = require('chai');
-
 var azure = require('azure');
 var winston = require('winston');
 var azureLogger = require("../lib/winston-azuretable.js").AzureLogger;
@@ -8,13 +7,20 @@ var azureLogger = require("../lib/winston-azuretable.js").AzureLogger;
 describe('azure logger', function() {
     var _tableService = azure.createTableService('UseDevelopmentStorage=true');
 
-    beforeEach(function() {
+    beforeEach(function(done) {
         _tableService.listTablesSegmented(null, function(error, result, response) {
-            if (result.entities) {
-                result.entities.foreach(function(tableName) {
-                    tableService.deleteTableIfExists(tableName);
-                })
+            if (result.entries) {
+                for (var index = 0; index < result.entries.length; index++) {
+                    var tableName = result.entries[index];
+                    _tableService.deleteTableIfExists(tableName, function(error) {
+                        if (error) {
+                            console.log('Deleting Table Error: ' + error);
+                        }
+                    });
+                }
             }
+
+            done();
         })
     })
 
@@ -34,13 +40,16 @@ describe('azure logger', function() {
         });
 
         it('happy path', function(done) {
+            var tableName = 'azureLoggerCtorHappyPath';
+
             var logger = new winston.transports.AzureLogger({
                 useDevStorage: true,
+                tableName: tableName,
                 callback: function() { 
-                    _tableService.listTablesSegmented(null, function(err, result, response) {
+                    _tableService.listTablesSegmented(null, function(error, result, response) {
                         expect(result.entries).to.have.length('1');
-                        expect(result.entries).to.include('log');
-                    })
+                        expect(result.entries).to.include(tableName);
+                    });
 
                     done(); 
                 }
@@ -51,13 +60,28 @@ describe('azure logger', function() {
 
     describe('log', function() {
         it('happy path', function(done) {
+            var tableName = 'testTable';
+            var partitionKey = 'testPartitionKey';
+
             var logger = new winston.transports.AzureLogger({
                 useDevStorage: true,
-                callback: function() { done(); }
-            });
+                tableName: tableName,
+                partitionKey: partitionKey,
+                callback: function() {
 
-            var msg = Math.random().toString(36).replace(/[^a-z]+/g, '');
-            logger.log('level', msg, '', function() { done() });
-        });
+                    var msg = Math.random().toString(36).replace(/[^a-z]+/g, '');
+                    logger.log('testLevel', msg, '', function() {
+                        var query = new azure.TableQuery()
+                                             .where('PartitionKey eq ?', partitionKey);
+
+                        _tableService.queryEntities(tableName, query, null, function(error, result, response) {
+                            expect(result.entries).to.have.length('1');
+                            console.log(result.entries);
+                            done();
+                        });
+                    })
+                }
+            });
+       });
     });
 });
