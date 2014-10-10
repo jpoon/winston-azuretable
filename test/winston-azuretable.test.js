@@ -63,21 +63,22 @@ describe('azure logger', function() {
 
     describe('log', function() {
         it('happy path', function(done) {
-            var tableName = 'testTable';
+            var expectedTableName = 'testTable';
             var expectedPartitionKey = 'testPartitionKey';
+            var expectedLevel = Math.random().toString(36).replace(/[^a-z]+/g, '');
+            var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
 
             var logger = new winston.transports.AzureLogger({
                 useDevStorage: true,
-                tableName: tableName,
+                tableName: expectedTableName,
                 partitionKey: expectedPartitionKey,
                 callback: function() {
 
-                    var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
-                    logger.log('testLevel', expectedMsg, '', function() {
+                    logger.log(expectedLevel, expectedMsg, { propName1: 'propValue1', propName2: 'propValue2' }, function() {
                         var query = new azure.TableQuery()
                                              .where('PartitionKey eq ?', expectedPartitionKey);
 
-                        _tableService.queryEntities(tableName, query, null, function(error, result, response) {
+                        _tableService.queryEntities(expectedTableName, query, null, function(error, result, response) {
                             expect(result.entries).to.have.length('1');
 
                             var actualPartitionKey = result.entries[0].PartitionKey._;
