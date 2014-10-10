@@ -19,31 +19,11 @@ module.exports = function(grunt) {
             },
 
             all: { src: ['test/**/*.js'] }
-        },
-
-        /* grunt-contrib-watch */
-        watch: {
-            jshint: {
-                files: ['<%= jshint.files %>'],
-                tasks: ['jshint']
-            },
-            sass: {
-                files: 'public/sass/*.scss',
-                tasks: ['sass:dist']
-            },
-            express: {
-                files: ['server/**/*.js', 'server/**/*.jade'],
-                tasks: ['express:dev'],
-                options: {
-                    spawn: false
-                }
-            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-simple-mocha');
-    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('test', ['simplemocha']);
 };
