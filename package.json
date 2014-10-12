@@ -22,5 +22,16 @@
   },
   "dependencies": {
     "azure": "^0.10.0"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpoon/winston-azuretable.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jpoon/winston-azuretable/issues"
+  },
+  "homepage": "https://github.com/jpoon/winston-azuretable"
 }
