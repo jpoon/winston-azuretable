@@ -1,3 +1,5 @@
+/* jshint expr:true */
+
 var expect = require('chai').expect,
     chai = require('chai'),
     azure = require('azure'),
