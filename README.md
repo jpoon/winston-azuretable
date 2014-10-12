@@ -1,6 +1,8 @@
 winston-azuretable
 ==================
 
+[![NPM version](https://badge.fury.io/js/winston-azuretable.svg)](http://badge.fury.io/js/winston-azuretable)
+
 An Azure Table transport for Winston logging library.
 
 Installation
