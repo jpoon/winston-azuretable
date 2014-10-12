@@ -19,7 +19,7 @@ Usage
   var winston = require('winston');
   var azureLogger = require('winston-azuretable').AzureLogger
 
-  winston.add((azureLogger), options);
+  winston.add(azureLogger, options);
 ```
 
 The transport accepts the following options:
