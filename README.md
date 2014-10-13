@@ -3,7 +3,7 @@ winston-azuretable
 
 [![NPM version](https://badge.fury.io/js/winston-azuretable.svg)](http://badge.fury.io/js/winston-azuretable)
 [![Dependency Status](https://david-dm.org/jpoon/winston-azuretable.svg)](https://david-dm.org/jpoon/winston-azuretable)
-[![devDependency Status](https://david-dm.org/jpoon/winston-azuretable.svg)](https://david-dm.org/jpoon/winston-azuretable#info=devDependencies)
+[![devDependency Status](https://david-dm.org/jpoon/winston-azuretable/dev-status.svg)](https://david-dm.org/jpoon/winston-azuretable#info=devDependencies)
 
 An Azure Table Storage transport for [Winston](https://github.com/flatiron/winston) logging library.
 
