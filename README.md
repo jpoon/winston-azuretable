@@ -1,7 +1,7 @@
 winston-azuretable
 ==================
 
-[![NPM version](https://badge.fury.io/js/winston-azuretable.svg)](http://badge.fury.io/js/winston-azuretable)
+[![NPM version](https://badge.fury.io/js/winston-azuretable.svg)](http://badge.fury.io/js/winston-azuretable) https://david-dm.org/jpoon/winston-azuretable.png
 
 An Azure Table Storage transport for [Winston](https://github.com/flatiron/winston) logging library.
 
