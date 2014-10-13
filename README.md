@@ -31,3 +31,21 @@ The transport accepts the following options:
 * **tableName**: name of the table to log messages (default: `log`)
 * **partitionKey**: table partition key to use (default: `process.env.NODE_ENV`)
 * **silent**: Boolean flag indicating whether to suppress output (default: `false`)
+
+Table Entity
+------------
+Each log entry will create the following entity:
+
+* **PartitionKey**: table partition key (default: `process.env.NODE_ENV`)
+* **RowKey**: number of milliseconds since epoch
+* **hostname**: hostname of operating system
+* **pid**: node process id
+* **level**: winston logging level
+* **msg**: logging message
+* **createdDateTime**: date log entry created
+* *[metadata properties]*: creates associated property in entity for each given metadata property
+
+
+Inspirations/Alternatives
+-------------------------
+Inspired by [winston-skywriter](https://github.com/pofallon/winston-skywriter/) but supports latest Azure SDK (0.10.0).
