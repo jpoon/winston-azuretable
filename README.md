@@ -48,4 +48,4 @@ Each log entry will create the following entity:
 
 Inspirations/Alternatives
 -------------------------
-Inspired by [winston-skywriter](https://github.com/pofallon/winston-skywriter/) but supports latest Azure SDK (0.10.0).
+Inspired by [winston-skywriter](https://github.com/pofallon/winston-skywriter/). Differences in implementation include: support for latest Azure SDK (0.10.0), dependency against Azure SDK directly instead of an intermediary library (bluesky), row key is the number of milliseconds since epoch resulting in Azure table automatically having most recent log entry first, implementation of Winston query method.
