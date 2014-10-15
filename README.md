@@ -27,8 +27,8 @@ Usage
 The transport accepts the following options:
 
 * **useDevStorage**: Boolean flag denoting whether to use the Azure Storage Emulator (default: `false`)
-* **account**: Azure Storage Account Name
-* **key**: Azure Storage Account Key
+* **account**: Azure Storage Account Name. In lieu of this setting, you can set the environment variable: `AZURE_STORAGE_ACCOUNT`
+* **key**: Azure Storage Account Key. In lieu of this setting, you can set the environment variable: `AZURE_STORAGE_ACCESS_KEY`
 * **level**: lowest logging level transport to be logged (default: `info`)
 * **tableName**: name of the table to log messages (default: `log`)
 * **partitionKey**: table partition key to use (default: `process.env.NODE_ENV`)
