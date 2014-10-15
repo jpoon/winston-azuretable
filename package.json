@@ -1,6 +1,6 @@
 {
   "name": "winston-azuretable",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Azure Table Storage transport for Winston",
   "main": "./lib/winston-azuretable.js",
   "scripts": {
@@ -8,7 +8,11 @@
   },
   "keywords": [
     "winston",
-    "azure"
+    "azure",
+    "table",
+    "logging",
+    "sysadmin",
+    "tools"
   ],
   "author": "Jason Poon <github@jasonpoon.ca>",
   "license": "ISC",
