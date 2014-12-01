@@ -1,6 +1,6 @@
 {
   "name": "winston-azuretable",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Azure Table Storage transport for Winston",
   "main": "./lib/winston-azuretable.js",
   "scripts": {
