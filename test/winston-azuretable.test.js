@@ -51,6 +51,7 @@ describe('azure logger', function() {
                 useDevStorage: true,
                 tableName: tableName,
                 callback: function() { 
+
                     _tableService.listTablesSegmented(null, function(error, result, response) {
                         expect(result.entries).to.have.length('1');
                         expect(result.entries).to.include(tableName);
@@ -91,8 +92,8 @@ describe('azure logger', function() {
                             var actualLevel = result.entries[0].level._;
                             var actualMsg = result.entries[0].msg._;
                             var actualCreatedDatetime = result.entries[0].createdDateTime._;
-                            var actualPropName1 = result.entries[0].propName1._;
-                            var actualPropName2 = result.entries[0].propName2._;
+                            var actualPropName1 = result.entries[0].propName1_._;
+                            var actualPropName2 = result.entries[0].propName2_._;
 
                             expect(actualPartitionKey).to.be.equal(expectedPartitionKey);
                             expect(actualHostname).to.not.be.empty;
