@@ -2,9 +2,11 @@
 
 var expect = require('chai').expect,
     chai = require('chai'),
-    azure = require('azure'),
+    azure = require('azure-storage'),
     winston = require('winston'),
     azureLogger = require("../lib/winston-azuretable.js").AzureLogger;
+
+chai.config.includeStack = true;
 
 describe('azure logger', function() {
     var _tableService = azure.createTableService('UseDevelopmentStorage=true');
@@ -95,13 +97,13 @@ describe('azure logger', function() {
                             var actualPropName1 = result.entries[0].propName1_._;
                             var actualPropName2 = result.entries[0].propName2_._;
 
-                            expect(actualPartitionKey).to.be.equal(expectedPartitionKey);
-                            expect(actualHostname).to.not.be.empty;
-                            expect(actualPid).to.not.be.empty;
-                            expect(actualLevel).to.be.equal(expectedLevel);
-                            expect(actualMsg).to.be.equal(expectedMsg);
-                            expect(actualPropName1).to.be.equal('propValue1');
-                            expect(actualPropName2).to.be.equal('propValue2');
+                            expect(actualPartitionKey).to.equal(expectedPartitionKey);
+                            expect(actualHostname).to.exist;
+                            expect(actualPid).to.exist;
+                            expect(actualLevel).to.equal(expectedLevel);
+                            expect(actualMsg).to.equal(expectedMsg);
+                            expect(actualPropName1).to.equal('propValue1');
+                            expect(actualPropName2).to.equal('propValue2');
                             done();
                         });
                     });
