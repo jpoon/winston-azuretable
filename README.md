@@ -53,7 +53,7 @@ Inspirations/Alternatives
 -------------------------
 Inspired by [winston-skywriter](https://github.com/pofallon/winston-skywriter/). Differences in implementation include: 
 
-* support for latest Azure SDK (0.10.0)
-* dependency against Azure SDK directly instead of an intermediary library (bluesky)
+* support for latest Azure Storage SDK
+* dependency against Azure Storage SDK directly instead of an intermediary library (bluesky)
 * row key is the number of milliseconds since epoch resulting in Azure table naturally having most recent log entry first
 * implementation of Winston query method.
