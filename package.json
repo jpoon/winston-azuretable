@@ -1,6 +1,6 @@
 {
   "name": "winston-azuretable",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Azure Table Storage transport for Winston",
   "main": "./lib/winston-azuretable.js",
   "scripts": {
@@ -17,11 +17,11 @@
   "author": "Jason Poon <github@jasonpoon.ca>",
   "license": "MIT",
   "devDependencies": {
-    "chai": "^3.3.0",
-    "grunt": "^0.4.5",
-    "grunt-contrib-jshint": "^0.11.3",
-    "grunt-simple-mocha": "^0.4.0",
-    "mocha": "^2.3.3",
+    "chai": "^3.5.0",
+    "grunt": "^1.0.1",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-simple-mocha": "^0.4.1",
+    "mocha": "^3.0.2",
     "winston": "^1.1.0"
   },
   "dependencies": {
