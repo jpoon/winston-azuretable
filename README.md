@@ -31,6 +31,7 @@ The transport accepts the following options:
 * **tableName**: name of the table to log messages (default: `log`)
 * **partitionKey**: table partition key to use (default: `process.env.NODE_ENV`)
 * **silent**: Boolean flag indicating whether to suppress output (default: `false`)
+* **nestedMeta**: store metadata as a JSON document in `meta` column (default: `false`)
 
 Table Entity
 ------------
@@ -43,7 +44,10 @@ Each log entry will create the following entity:
 * **level**: winston logging level
 * **msg**: logging message
 * **createdDateTime**: date log entry created
-* *[metadata properties]*: creates associated property in entity for each given metadata property
+* when `nestedMeta` option is `false`:
+  * *[metadata properties]*: creates associated property in entity for each given metadata property
+* when `nestedMeta` option is `true`:
+  * **meta**: JSON-encoded metadata properties
 
 
 Inspirations/Alternatives
