@@ -110,6 +110,45 @@ describe('azure logger', function() {
                 }
             });
         });
+
+        it('nested metadata', function(done) {
+            var tableName = 'testTable';
+            var partitionKey = 'testPartitionKey';
+            var level = 'info';
+            var msg = 'testing';
+            var expectedMeta = {
+                propName1: 'propValue1',
+                propName2: 'propValue2'
+            };
+
+            var logger = new winston.transports.AzureLogger({
+                useDevStorage: true,
+                tableName: tableName,
+                partitionKey: partitionKey,
+                nestedMeta: true,
+                callback: function() {
+
+                    logger.log(level, msg, expectedMeta, function(error) {
+                        expect(error).to.be.null;
+
+                        var query = new azure.TableQuery()
+                                             .where('PartitionKey eq ?', partitionKey);
+
+                        _tableService.queryEntities(tableName, query, null, function(error, result, response) {
+                            expect(result.entries).to.have.length('1');
+
+                            var actualMeta = JSON.parse(result.entries[0].meta._);
+                            var actualPropValue1 = actualMeta.propName1;
+                            var actualPropValue2 = actualMeta.propName2;
+
+                            expect(actualPropValue1).to.equal('propValue1');
+                            expect(actualPropValue2).to.equal('propValue2');
+                            done();
+                        });
+                    });
+                }
+            });
+        });
     });
 
     describe('query', function() {
