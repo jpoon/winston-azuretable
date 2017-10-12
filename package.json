@@ -1,6 +1,6 @@
 {
   "name": "winston-azuretable",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Azure Table Storage transport for Winston",
   "main": "./lib/winston-azuretable.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "winston": "^2.4.0"
   },
   "dependencies": {
-    "azure-storage": "^2.5.0"
+    "azure-storage": "^2.6.0"
   },
   "directories": {
     "test": "test"

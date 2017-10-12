@@ -168,7 +168,7 @@ describe('azure logger', function() {
             });
         });
     });
-/*
+
     describe('query', function() {
         it('happy path', function (done) {
             var tableName = Math.random().toString(36).slice(2);
@@ -231,5 +231,4 @@ describe('azure logger', function() {
             });
         });
     });
-    */
 });
