@@ -8,7 +8,7 @@ An Azure Table Storage transport for [Winston](https://github.com/flatiron/winst
 Installation
 ------------
 
-```
+```bash
   $ npm install winston
   $ npm install winston-azuretable
 ```
