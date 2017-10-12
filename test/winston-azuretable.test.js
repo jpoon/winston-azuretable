@@ -1,30 +1,46 @@
 /* jshint expr:true */
 
-var expect = require('chai').expect,
-    chai = require('chai'),
-    azure = require('azure-storage'),
-    winston = require('winston'),
-    azureLogger = require("../lib/winston-azuretable.js").AzureLogger;
+const expect = require('chai').expect,
+      chai = require('chai'),
+      azure = require('azure-storage'),
+      winston = require('winston'),
+      azureLogger = require("../lib/winston-azuretable.js").AzureLogger;
 
 chai.config.includeStack = true;
 
-describe('azure logger', function() {
-    var _tableService = azure.createTableService('UseDevelopmentStorage=true');
+const account_name = '';
+const account_key = '';
+const useDevStorage = (!account_name && !account_key) ? true : false;
 
-    afterEach(function(done) {
-        _tableService.listTablesSegmented(null, function(error, result, response) {
+describe('azure logger', function() {
+    let _tableService = azure.createTableService('UseDevelopmentStorage=true');
+    if (account_name && account_key) {
+        _tableService = azure.createTableService(account_name, account_key);
+    }
+
+    afterEach(done => {
+        var deleteTable = function(tableService, tableName) {
+            return new Promise((resolve, reject) => {
+                tableService.deleteTableIfExists(tableName, error => {
+                    if (error) {
+                        reject(error);
+                    }
+                    resolve();
+                });
+            });
+        };
+
+        _tableService.listTablesSegmented(null, (error, result, response) => {
             expect(error).to.be.null;
 
             if (result.entries && result.entries.length > 0) {
-                var deleteTableCallback = function(error) { 
-                    expect(error).to.be.null;
-                    done();
-                };
-
+                let list = [];
                 for (var index = 0; index < result.entries.length; index++) {
                     var tableName = result.entries[index];
-                    _tableService.deleteTableIfExists(tableName, deleteTableCallback);
+                    list.push(deleteTable(_tableService, tableName));
                 }
+
+                Promise.all(list).then(done());
             } else {
                 done();
             }
@@ -47,18 +63,16 @@ describe('azure logger', function() {
         });
 
         it('happy path', function(done) {
-            var tableName = 'azureLoggerCtorHappyPath';
-
+            var tableName = 'test' + Math.random().toString(36).substring(2, 15);
             var logger = new winston.transports.AzureLogger({
-                useDevStorage: true,
+                useDevStorage: useDevStorage,
+                account: account_name,
+                key: account_key, 
                 tableName: tableName,
                 callback: function() { 
-
                     _tableService.listTablesSegmented(null, function(error, result, response) {
-                        expect(result.entries).to.have.length('1');
                         expect(result.entries).to.include(tableName);
                     });
-
                     done(); 
                 }
             });
@@ -68,13 +82,15 @@ describe('azure logger', function() {
 
     describe('log', function() {
         it('happy path', function(done) {
-            var expectedTableName = 'testTable';
+            var expectedTableName = 'test' + Math.random().toString(36).substring(2, 15);
             var expectedPartitionKey = 'testPartitionKey';
             var expectedLevel = Math.random().toString(36).replace(/[^a-z]+/g, '');
             var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
 
             var logger = new winston.transports.AzureLogger({
-                useDevStorage: true,
+                useDevStorage: useDevStorage,
+                account: account_name,
+                key: account_key, 
                 tableName: expectedTableName,
                 partitionKey: expectedPartitionKey,
                 callback: function() {
@@ -112,7 +128,7 @@ describe('azure logger', function() {
         });
 
         it('nested metadata', function(done) {
-            var tableName = 'testTable';
+            var tableName = 'test' + Math.random().toString(36).substring(2, 15);
             var partitionKey = 'testPartitionKey';
             var level = 'info';
             var msg = 'testing';
@@ -122,7 +138,9 @@ describe('azure logger', function() {
             };
 
             var logger = new winston.transports.AzureLogger({
-                useDevStorage: true,
+                useDevStorage: useDevStorage,
+                account: account_name,
+                key: account_key, 
                 tableName: tableName,
                 partitionKey: partitionKey,
                 nestedMeta: true,
@@ -150,27 +168,28 @@ describe('azure logger', function() {
             });
         });
     });
-
+/*
     describe('query', function() {
-        var logger;
+        it('happy path', function (done) {
+            var tableName = Math.random().toString(36).slice(2);
 
-        beforeEach(function(done) {
-            logger = new winston.transports.AzureLogger({
-                useDevStorage: true,
-                callback: function() {
+            var logger = new winston.transports.AzureLogger({
+                useDevStorage: useDevStorage,
+                account: account_name,
+                key: account_key,
+                tableName: tableName,
+                callback: function () {
                     done();
                 }
             });
-        });
 
-        it('happy path', function(done) {
             var expectedLevel = Math.random().toString(36).replace(/[^a-z]+/g, '');
             var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
 
-            logger.log(expectedLevel, expectedMsg, function(error) {
+            logger.log(expectedLevel, expectedMsg, function (error) {
                 expect(error).to.be.null;
 
-                logger.query(null, function(error, result) {
+                logger.query(null, function (error, result) {
                     expect(error).to.be.null;
                     expect(result).to.have.length('1');
                     expect(result[0].level).to.be.equal(expectedLevel);
@@ -180,17 +199,29 @@ describe('azure logger', function() {
             });
         });
 
-        it('expectedFields', function(done) {
+        it('expectedFields', function (done) {
+            var tableName = Math.random().toString(36).slice(2);
+
+            var logger = new winston.transports.AzureLogger({
+                useDevStorage: useDevStorage,
+                account: account_name,
+                key: account_key,
+                tableName: tableName,
+                callback: function () {
+                    done();
+                }
+            });
+
             var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
 
-            logger.log(null, expectedMsg, function(error) {
+            logger.log(null, expectedMsg, function (error) {
                 expect(error).to.be.null;
 
                 var options = {
                     fields: ['msg']
                 };
 
-                logger.query(options, function(error, result) {
+                logger.query(options, function (error, result) {
                     expect(error).to.be.null;
                     expect(result).to.have.length('1');
                     expect(Object.keys(result[0])).to.have.length('1');
@@ -199,6 +230,6 @@ describe('azure logger', function() {
                 });
             });
         });
-
     });
+    */
 });
