@@ -5,3 +5,5 @@ before_install:
   - npm install grunt-cli -g
 script: 
   - grunt jshint
+notifications:
+  email: false
