@@ -8,18 +8,19 @@ const expect = require('chai').expect,
 
 chai.config.includeStack = true;
 
-const account_name = '';
-const account_key = '';
+const account_name = process.env.AZURE_STORAGE_ACCOUNT || '';
+const account_key = process.env.AZURE_STORAGE_ACCESS_KEY || '';
 const useDevStorage = (!account_name && !account_key) ? true : false;
 
 describe('azure logger', function() {
-    let _tableService = azure.createTableService('UseDevelopmentStorage=true');
+    const table_name_prefix = "winstontest";
+    let tableService = azure.createTableService('UseDevelopmentStorage=true');
     if (account_name && account_key) {
-        _tableService = azure.createTableService(account_name, account_key);
+        tableService = azure.createTableService(account_name, account_key);
     }
 
-    afterEach(done => {
-        var deleteTable = function(tableService, tableName) {
+    afterEach(async () => {
+        var deleteTable = async function(tableService, tableName) {
             return new Promise((resolve, reject) => {
                 tableService.deleteTableIfExists(tableName, error => {
                     if (error) {
@@ -30,20 +31,17 @@ describe('azure logger', function() {
             });
         };
 
-        _tableService.listTablesSegmented(null, (error, result, response) => {
+        await tableService.listTablesSegmented(null, async (error, result, response) => {
             expect(error).to.be.null;
 
             if (result.entries && result.entries.length > 0) {
-                let list = [];
                 for (var index = 0; index < result.entries.length; index++) {
                     var tableName = result.entries[index];
-                    list.push(deleteTable(_tableService, tableName));
+                    if (tableName.startsWith(table_name_prefix)) {
+                        await deleteTable(tableService, tableName);
+                    }
                 }
-
-                Promise.all(list).then(done());
-            } else {
-                done();
-            }
+            } 
         });
     });
 
@@ -63,14 +61,14 @@ describe('azure logger', function() {
         });
 
         it('happy path', function(done) {
-            var tableName = 'test' + Math.random().toString(36).substring(2, 15);
+            var tableName = table_name_prefix + Math.random().toString(36).substring(2, 15);
             var logger = new winston.transports.AzureLogger({
                 useDevStorage: useDevStorage,
                 account: account_name,
                 key: account_key, 
                 tableName: tableName,
                 callback: function() { 
-                    _tableService.listTablesSegmented(null, function(error, result, response) {
+                    tableService.listTablesSegmented(null, function(error, result, response) {
                         expect(result.entries).to.include(tableName);
                     });
                     done(); 
@@ -82,8 +80,8 @@ describe('azure logger', function() {
 
     describe('log', function() {
         it('happy path', function(done) {
-            var expectedTableName = 'test' + Math.random().toString(36).substring(2, 15);
-            var expectedPartitionKey = 'testPartitionKey';
+            var expectedTableName = table_name_prefix + Math.random().toString(36).substring(2, 15);
+            var expectedPartitionKey = Math.random().toString(36).substring(2, 15);
             var expectedLevel = Math.random().toString(36).replace(/[^a-z]+/g, '');
             var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
 
@@ -101,7 +99,7 @@ describe('azure logger', function() {
                         var query = new azure.TableQuery()
                                              .where('PartitionKey eq ?', expectedPartitionKey);
 
-                        _tableService.queryEntities(expectedTableName, query, null, function(error, result, response) {
+                        tableService.queryEntities(expectedTableName, query, null, function(error, result, response) {
                             expect(result.entries).to.have.length('1');
 
                             var actualPartitionKey = result.entries[0].PartitionKey._;
@@ -128,8 +126,8 @@ describe('azure logger', function() {
         });
 
         it('nested metadata', function(done) {
-            var tableName = 'test' + Math.random().toString(36).substring(2, 15);
-            var partitionKey = 'testPartitionKey';
+            var tableName = table_name_prefix + Math.random().toString(36).substring(2, 15);
+            var partitionKey = Math.random().toString(36).substring(2, 15);
             var level = 'info';
             var msg = 'testing';
             var expectedMeta = {
@@ -152,7 +150,7 @@ describe('azure logger', function() {
                         var query = new azure.TableQuery()
                                              .where('PartitionKey eq ?', partitionKey);
 
-                        _tableService.queryEntities(tableName, query, null, function(error, result, response) {
+                        tableService.queryEntities(tableName, query, null, function(error, result, response) {
                             expect(result.entries).to.have.length('1');
 
                             var actualMeta = JSON.parse(result.entries[0].meta._);
@@ -171,63 +169,63 @@ describe('azure logger', function() {
 
     describe('query', function() {
         it('happy path', function (done) {
-            var tableName = Math.random().toString(36).slice(2);
+            var tableName = table_name_prefix + Math.random().toString(36).slice(2);
+            var partitionKey = Math.random().toString(36).substring(2, 15);
 
             var logger = new winston.transports.AzureLogger({
                 useDevStorage: useDevStorage,
                 account: account_name,
                 key: account_key,
                 tableName: tableName,
+                partitionKey: partitionKey,
                 callback: function () {
-                    done();
+                    var expectedLevel = Math.random().toString(36).replace(/[^a-z]+/g, '');
+                    var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
+        
+                    logger.log(expectedLevel, expectedMsg, function (error) {
+                        expect(error).to.be.null;
+        
+                        logger.query(null, function (error, result) {
+                            expect(error).to.be.null;
+                            expect(result).to.have.length('1');
+                            expect(result[0].level).to.be.equal(expectedLevel);
+                            expect(result[0].msg).to.be.equal(expectedMsg);
+                            done();
+                        });
+                    });
                 }
-            });
-
-            var expectedLevel = Math.random().toString(36).replace(/[^a-z]+/g, '');
-            var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
-
-            logger.log(expectedLevel, expectedMsg, function (error) {
-                expect(error).to.be.null;
-
-                logger.query(null, function (error, result) {
-                    expect(error).to.be.null;
-                    expect(result).to.have.length('1');
-                    expect(result[0].level).to.be.equal(expectedLevel);
-                    expect(result[0].msg).to.be.equal(expectedMsg);
-                    done();
-                });
             });
         });
 
         it('expectedFields', function (done) {
-            var tableName = Math.random().toString(36).slice(2);
+            var tableName = table_name_prefix + Math.random().toString(36).slice(2);
+            var partitionKey = Math.random().toString(36).substring(2, 15);
 
             var logger = new winston.transports.AzureLogger({
                 useDevStorage: useDevStorage,
                 account: account_name,
                 key: account_key,
                 tableName: tableName,
+                partitionKey: partitionKey, 
                 callback: function () {
-                    done();
+                    var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
+
+                    logger.log(null, expectedMsg, function (error) {
+                        expect(error).to.be.null;
+        
+                        var options = {
+                            fields: ['msg']
+                        };
+        
+                        logger.query(options, function (error, result) {
+                            expect(error).to.be.null;
+                            expect(result).to.have.length('1');
+                            expect(Object.keys(result[0])).to.have.length('1');
+                            expect(result[0].msg).to.be.equal(expectedMsg);
+                            done();
+                        });
+                    });
                 }
-            });
-
-            var expectedMsg = Math.random().toString(36).replace(/[^a-z]+/g, '');
-
-            logger.log(null, expectedMsg, function (error) {
-                expect(error).to.be.null;
-
-                var options = {
-                    fields: ['msg']
-                };
-
-                logger.query(options, function (error, result) {
-                    expect(error).to.be.null;
-                    expect(result).to.have.length('1');
-                    expect(Object.keys(result[0])).to.have.length('1');
-                    expect(result[0].msg).to.be.equal(expectedMsg);
-                    done();
-                });
             });
         });
     });
