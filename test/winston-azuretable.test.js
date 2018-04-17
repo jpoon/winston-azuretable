@@ -1,10 +1,12 @@
-/* jshint expr:true */
+/* eslint-env mocha */
+/* eslint-disable no-unused-vars */
 
 const expect = require('chai').expect,
       chai = require('chai'),
       azure = require('azure-storage'),
       winston = require('winston'),
       azureLogger = require("../lib/winston-azuretable.js").AzureLogger;
+
 
 chai.config.includeStack = true;
 
@@ -19,8 +21,8 @@ describe('azure logger', function() {
         tableService = azure.createTableService(account_name, account_key);
     }
 
-    afterEach(async () => {
-        var deleteTable = async function(tableService, tableName) {
+    afterEach(function(done) {
+        var deleteTable = function(tableService, tableName) {
             return new Promise((resolve, reject) => {
                 tableService.deleteTableIfExists(tableName, error => {
                     if (error) {
@@ -29,9 +31,9 @@ describe('azure logger', function() {
                     resolve();
                 });
             });
-        };
+        }
 
-        await tableService.listTablesSegmented(null, async (error, result, response) => {
+        tableService.listTablesSegmented(null, async (error, result) => {
             expect(error).to.be.null;
 
             if (result.entries && result.entries.length > 0) {
@@ -42,6 +44,8 @@ describe('azure logger', function() {
                     }
                 }
             } 
+
+            done();
         });
     });
 
@@ -62,13 +66,13 @@ describe('azure logger', function() {
 
         it('happy path', function(done) {
             var tableName = table_name_prefix + Math.random().toString(36).substring(2, 15);
-            var logger = new winston.transports.AzureLogger({
+            new winston.transports.AzureLogger({
                 useDevStorage: useDevStorage,
                 account: account_name,
                 key: account_key, 
                 tableName: tableName,
                 callback: function() { 
-                    tableService.listTablesSegmented(null, function(error, result, response) {
+                    tableService.listTablesSegmented(null, function(error, result) {
                         expect(result.entries).to.include(tableName);
                     });
                     done(); 
@@ -99,7 +103,7 @@ describe('azure logger', function() {
                         var query = new azure.TableQuery()
                                              .where('PartitionKey eq ?', expectedPartitionKey);
 
-                        tableService.queryEntities(expectedTableName, query, null, function(error, result, response) {
+                        tableService.queryEntities(expectedTableName, query, null, function(error, result) {
                             expect(result.entries).to.have.length('1');
 
                             var actualPartitionKey = result.entries[0].PartitionKey._;
@@ -107,7 +111,6 @@ describe('azure logger', function() {
                             var actualPid = result.entries[0].pid._;
                             var actualLevel = result.entries[0].level._;
                             var actualMsg = result.entries[0].msg._;
-                            var actualCreatedDatetime = result.entries[0].createdDateTime._;
                             var actualPropName1 = result.entries[0].propName1_._;
                             var actualPropName2 = result.entries[0].propName2_._;
 
@@ -150,7 +153,7 @@ describe('azure logger', function() {
                         var query = new azure.TableQuery()
                                              .where('PartitionKey eq ?', partitionKey);
 
-                        tableService.queryEntities(tableName, query, null, function(error, result, response) {
+                        tableService.queryEntities(tableName, query, null, function(error, result) {
                             expect(result.entries).to.have.length('1');
 
                             var actualMeta = JSON.parse(result.entries[0].meta._);

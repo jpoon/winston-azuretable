@@ -1,0 +1,20 @@
+{
+  "globals": {
+    "entGen": true
+  },
+  "plugins": [
+    "node", 
+    "import",
+    "mocha"
+  ],
+  "extends": ["eslint:recommended", "plugin:node/recommended"],
+  "parserOptions": {
+    "ecmaVersion": 8
+  },
+  "rules": {
+      "node/exports-style": ["error", "module.exports"],
+      "node/no-unpublished-require": 0,
+      "node/no-missing-require": 0,
+      "mocha/no-exclusive-tests": "error"
+  }
+}
